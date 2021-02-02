@@ -1,0 +1,260 @@
+---
+title: "Pathview"
+author: "Deepthi"
+date: "31/12/2020"
+output: 
+  html_document: 
+    fig_width: 11
+    fig_height: 7
+bibliography: pathview.bib
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Pathview 
+
+Pathview is an independent software package for pathway based data integration and visualization.Pathview has four functional modules the Downloader, Parser, Mapper and viewer.Pathview plots and displays user data on to their respective pathways. [@luo:etal:2013]
+
+## Introduction 
+
+The pathway solutions are used in NGS sequencing data analysis.Its has been frequently applied to gene expression, GWAS, proteomics and metagenomics.Pathway analysis is more delicate,repeatable and descriptive when compared to individual gene approach.Several pathway analysis methods and data types are introduced in R/Bioconductor but nothing is devoted for pathway data integration. A new package called pathview is used for data integration and visualization.It has three aspects
+1.Available and functional pathways
+2.Data integration capacity
+3.Easy to automate and merge with pathway evaluation tools.
+
+## Methods 
+Pathview package can be divided into 4 functional modules Downloader, Parser, Mapper and Viewer.
+
+### Data Visualization
+It produces both KEGG view and Graphiz view for pathways.Both graph systems are easy to understand and design.They can allow changes to nodes and edges to KEGG view. KEGG view can be available for all metadata for all tissues, cells , input and output connections, which is important for understanding and analysis of pathway biology.
+
+### Data integration
+ Pathview provides data integration.It is used to merge, interpret and view different types of biological data for gene expression, protein expression, genetic variations and genome associations which can be presented to pathway. The integrated mapper module can plot up to 12 types of gene IDs or protein IDs and 21 types of compound IDs to KEGG Ids.It has pathway information upto 2000species and can accept various formats such KEGG code, scientific or common names.Pathview runs on variety of data attributes for both continuous and discrete data.
+ 
+### Automated and integrated Analysis
+Pathview is an open source, error free computer program.So it is used to merge pathways to gene expression.pathview can integrate with broad range of reliable tools presenting to the R/Bioconductor for sequencing data and pathway analysis.This package analysis also integrates with another package called GAGE in bioconductor.
+In pathview they use heat maps, scatter plots/line plots to visualize perturbation patterns.These plots are easy to generated in groups.The graphs are generated in a structured way for both classical and line plots.Thus improving the analysis and explanation of NGS molecular data.
+KEGG XML data files has small insufficiencies, incompatible and error records due to manual correction.
+Pathview parser rights the incorrect KEGG codes to enzyme-compound reactions by integrating with the Ecrel Record of reactions.Pathview utilizes KEGG graph package to parse KEGG data files.
+
+``` {r method,echo=FALSE}
+library(knitr)
+library(ggplot2)
+library (png)
+img1_path <- "pathvew_method-Page-1.png"
+img1 <- readPNG(img1_path, native = TRUE, info = TRUE)
+include_graphics(img1_path)
+```
+
+## Discussion
+pathview produces results in the form of pathway graphs or pictures which are human readable, easy to understand. It works with broad range of data types, IDs and formats.It can be easily merged with other tools for perfect pathway analysis.It works well with all formats available in KEGG pathways.
+
+## Results
+The results obtained here are related to gene gse16873 is a Microarray data from breast cancer. Its pathways related to gene are involved in cell cycle with  pathway ID hsa04110 and propionate metabolism in form pictures in KEGG view as PNG file format and Graphiz view as PDF file formats.We also integrated and visualized both gene data and compound data with metabolic pathways.
+
+### Installation of pathview package
+
+```r
+if (!requireNamespace("BiocManager", quietly=TRUE))
+install.packages("BiocManager")
+BiocManager::install("pathview")
+ ```
+ 
+### Data Visualisation using pathview package
+ 
+```{r pathview}
+# All defaults
+library(pathview) # load Pathview package
+library(knitr)    # For knitting document and include_graphics fuction
+library(ggplot2)  # For plotting 
+library(png)      # For grabbing  the dimensions of png files
+data(gse16873.d)  #Gene id
+data(demo.paths)  # pathways related to user gene &  illustrated  3 pathways
+data(paths.hsa)   # hsa stand for humans
+head(paths.hsa,3) # first 3 pathways are displayed
+
+### kegg.native gives basic KEGG native pathway  
+i <- 1
+pv.out <- pathview(gene.data = gse16873.d[, 1], pathway.id = demo.paths$sel.paths[i],
+                   species = "hsa", out.suffix = "gse16873", kegg.native = T)
+
+img1_path <- "hsa04110.gse16873.png"
+img1 <- readPNG(img1_path, native = TRUE, info = TRUE)
+include_graphics(img1_path)
+
+list.files(pattern="hsa04110", full.names=T)
+str(pv.out) 
+head(pv.out$plot.data.gene)
+###   kegg.native_2layer  nodes and edges are added to Original KEGG view and official gene names are included in 2layer 
+pv.out <- pathview(gene.data = gse16873.d[, 1], pathway.id =      demo.paths$sel.paths[i],
+            species = "hsa", out.suffix = "gse16873.2layer", kegg.native = T,
+                   same.layer = F)  
+
+img2_path <- "hsa04110.gse16873.2layer.png"
+img2 <- readPNG(img2_path, native = TRUE, info = TRUE)
+include_graphics(img2_path)
+
+###   graphviz has more control over nodes and edges in the same layer
+pv.out <- pathview(gene.data = gse16873.d[, 1], pathway.id = demo.paths$sel.paths[i],
+                   species = "hsa", out.suffix = "gse16873", kegg.native = F,
+                   sign.pos = demo.paths$spos[i])
+library(pathview)
+?pathview 
+
+dim(pv.out$plot.data.gene)
+head(pv.out$plot.data.gene)
+
+###  graphviz.2layer
+pv.out <- pathview(gene.data = gse16873.d[, 1], pathway.id = demo.paths$sel.paths[i], species = "hsa", out.suffix = "gse16873.2layer", kegg.native = F, 
+    sign.pos = demo.paths$spos[i], same.layer = F)
+
+###  split 
+pv.out <- pathview(gene.data = gse16873.d[, 1], pathway.id = demo.paths$sel.paths[i], 
+    species = "hsa", out.suffix = "gse16873.split", kegg.native = F, 
+    sign.pos = demo.paths$spos[i], split.group = T)
+
+dim(pv.out$plot.data.gene)
+
+head(pv.out$plot.data.gene)
+
+### expanded 
+pv.out <- pathview(gene.data = gse16873.d[, 1], pathway.id = demo.paths$sel.paths[i], 
+    species = "hsa", out.suffix = "gse16873.split.expanded", kegg.native = F,
+    sign.pos = demo.paths$spos[i], split.group = T, expand.node = T)
+dim(pv.out$plot.data.gene)
+head(pv.out$plot.data.gene)
+### dataPrep.sim.cpd
+sim.cpd.data=sim.mol.data(mol.type="cpd", nmol=3000)
+data(cpd.simtypes)
+
+##Data integration   
+
+#### gene_cpd.data
+i <- 3
+print(demo.paths$sel.paths[i])
+pv.out <- pathview(gene.data = gse16873.d[, 1], cpd.data = sim.cpd.data, 
+    pathway.id = demo.paths$sel.paths[i], species = "hsa", out.suffix = "gse16873.cpd",keys.align = "y", kegg.native = T, key.pos = demo.paths$kpos1[i])
+img3_path <- "hsa00640.gse16873.cpd.png"
+img3 <- readPNG(img3_path, native = TRUE, info = TRUE)
+include_graphics(img3_path)   
+    
+str(pv.out)
+head(pv.out$plot.data.cpd)
+##### graphviz.gene_cpd.data
+pv.out <- pathview (gene.data = gse16873.d[, 1], cpd.data = sim.cpd.data, 
+    pathway.id = demo.paths$sel.paths[i], species = "hsa", out.suffix = "gse16873.cpd", keys.align = "y", kegg.native = F, key.pos = demo.paths$kpos2[i], 
+    sign.pos = demo.paths$spos[i], cpd.lab.offset = demo.paths$offs[i])
+#######sim.cpd.data2
+set.seed(10)
+sim.cpd.data2 = matrix(sample(sim.cpd.data, 18000, 
+    replace = T), ncol = 6)
+rownames(sim.cpd.data2) = names(sim.cpd.data)
+colnames(sim.cpd.data2) = paste("exp", 1:6, sep = "")
+head(sim.cpd.data2, 3)
+### multisample.gene_cpd.data
+### KEGG view 
+pv.out <- pathview(gene.data = gse16873.d[, 1:3], 
+    cpd.data = sim.cpd.data2[, 1:2], pathway.id = demo.paths$sel.paths[i], 
+    species = "hsa", out.suffix = "gse16873.cpd.3-2s", keys.align = "y", 
+    kegg.native = T, match.data = F, multi.state = T, same.layer = T)
+head(pv.out$plot.data.cpd)
+### KEGG view data match 
+pv.out <- pathview(gene.data = gse16873.d[, 1:3], 
+    cpd.data = sim.cpd.data2[, 1:2], pathway.id = demo.paths$sel.paths[i], 
+    species = "hsa", out.suffix = "gse16873.cpd.3-2s.match", 
+    keys.align = "y", kegg.native = T, match.data = T, multi.state = T, 
+    same.layer = T)
+#### graphviz view 
+pv.out <- pathview(gene.data = gse16873.d[, 1:3], 
+    cpd.data = sim.cpd.data2[, 1:2], pathway.id = demo.paths$sel.paths[i], 
+    species = "hsa", out.suffix = "gse16873.cpd.3-2s", keys.align = "y", 
+    kegg.native = F, match.data = F, multi.state = T, same.layer = T,
+    key.pos = demo.paths$kpos2[i], sign.pos = demo.paths$spos[i])
+###### multisample.gene_cpd.data.separate (eval=FALSE)
+#plot samples/states separately
+ pv.out <- pathview(gene.data = gse16873.d[, 1:3], 
+     cpd.data = sim.cpd.data2[, 1:2], pathway.id = demo.paths$sel.paths[i], 
+     species = "hsa", out.suffix = "gse16873.cpd.3-2s", keys.align = "y", 
+     kegg.native = T, match.data = F, multi.state = F, same.layer = T)
+######multisample.gene_cpd.data.2layer (eval = FALSE)
+ pv.out <- pathview(gene.data = gse16873.d[, 1:3], 
+     cpd.data = sim.cpd.data2[, 1:2], pathway.id = demo.paths$sel.paths[i], 
+     species = "hsa", out.suffix = "gse16873.cpd.3-2s.2layer", 
+     keys.align = "y", kegg.native = T, match.data = F, multi.state = T, 
+     same.layer = F)
+########discrete.gene_cpd.data
+ require(org.Hs.eg.db)
+gse16873.t <- apply(gse16873.d, 1, function(x) t.test(x, 
+    alternative = "two.sided")$p.value)
+sel.genes <- names(gse16873.t)[gse16873.t < 0.1]
+sel.cpds <- names(sim.cpd.data)[abs(sim.cpd.data) > 0.5]
+pv.out <- pathview(gene.data = sel.genes, cpd.data = sel.cpds, 
+    pathway.id = demo.paths$sel.paths[i], species = "hsa", out.suffix = "sel.genes.sel.cpd", 
+    keys.align = "y", kegg.native = T, key.pos = demo.paths$kpos1[i], 
+    limit = list(gene = 5, cpd = 2), bins = list(gene = 5, cpd = 2), 
+    na.col = "gray", discrete = list(gene = T, cpd = T))
+pv.out <- pathview(gene.data = sel.genes, cpd.data = sim.cpd.data, 
+    pathway.id = demo.paths$sel.paths[i], species = "hsa", out.suffix =   "sel.genes.cpd",keys.align = "y", kegg.native = T, key.pos = demo.paths$kpos1[i], 
+    limit = list(gene = 5, cpd = 1), bins = list(gene = 5, cpd = 10), 
+    na.col = "gray", discrete = list(gene = T, cpd = F))
+######### gene.ensprot_cpd.cas
+cpd.cas <- sim.mol.data(mol.type = "cpd", id.type = cpd.simtypes[2], 
+    nmol = 10000)
+gene.ensprot <- sim.mol.data(mol.type = "gene", id.type = gene.idtype.list[4], 
+    nmol = 50000)
+pv.out <- pathview(gene.data = gene.ensprot, cpd.data = cpd.cas, 
+    gene.idtype = gene.idtype.list[4], cpd.idtype = cpd.simtypes[2], 
+    pathway.id = demo.paths$sel.paths[i], species = "hsa", same.layer = T, 
+    out.suffix = "gene.ensprot.cpd.cas", keys.align = "y", kegg.native = T, 
+    key.pos = demo.paths$kpos2[i], sign.pos = demo.paths$spos[i], 
+    limit = list(gene = 3, cpd = 3), bins = list(gene = 6, cpd = 6))
+####### gene.ensprot_cpd.cas.manual.map
+id.map.cas <- cpdidmap(in.ids = names(cpd.cas), in.type = cpd.simtypes[2], 
+    out.type = "KEGG COMPOUND accession")
+     cpd.kc <- mol.sum(mol.data = cpd.cas, id.map = id.map.cas)
+      id.map.ensprot <- id2eg(ids = names(gene.ensprot), 
+    category = gene.idtype.list[4], org = "Hs")
+    gene.entrez <- mol.sum(mol.data = gene.ensprot, id.map = id.map.ensprot)
+pv.out <- pathview(gene.data = gene.entrez, cpd.data = cpd.kc, 
+    pathway.id = demo.paths$sel.paths[i], species = "hsa", same.layer = T, 
+    out.suffix = "gene.entrez.cpd.kc", keys.align = "y", kegg.native = T, 
+    key.pos = demo.paths$kpos2[i], sign.pos = demo.paths$spos[i], 
+    limit = list(gene = 3, cpd = 3), bins = list(gene = 6, cpd = 6))
+#######korg
+data(korg)
+head(korg)
+#number of species which use Entrez Gene as the default ID
+sum(korg[,"entrez.gnodes"]=="1",na.rm=T)
+#number of species which use other ID types or none as the default ID
+sum(korg[,"entrez.gnodes"]=="0",na.rm=T)
+#new from 2017: most species which do not have Entrez Gene annotation any more
+na.idx=is.na(korg[,"ncbi.geneid"])
+sum(na.idx)
+
+###### bods_gene.idtype.list
+data(bods)
+bods
+data(gene.idtype.list)
+gene.idtype.list
+
+###### eco.dat.Kegg
+eco.dat.entrez <-sim.mol.data(mol.type="gene",id.type="entrez",species="eco",
+                               nmol=3000)
+head(eco.dat.entrez)
+pv.out <- pathview(gene.data = eco.dat.entrez, gene.idtype="entrez",         pathway.id="00640", species = "eco", out.suffix = "eco.entrez", kegg.native = T,   same.layer=T)
+
+#######  eco.dat.symbol (eval = FALSE)
+egid.eco=eg2id(names(eco.dat.entrez), category="symbol", pkg="org.EcK12.eg.db")
+## eco.dat.symbol <- eco.dat.entrez
+## names(eco.dat.symbol) <- egid.eco[,2]
+## head(eco.dat.kegg)
+## pv.out <- pathview(gene.data = eco.dat.symbol, gene.idtype="symbol",
+##     pathway.id = "00640", species = "eco", out.suffix = "eco.symbol.2layer",
+##     kegg.native = T, same.layer=F)
+
+```
+
+## Reference
+
